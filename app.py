@@ -12,7 +12,7 @@ from lib.validator import validate_blueprint
 from lib.compiler import compile_to_markdown
 from lib.mindmap_generator import generate_mindmap
 from lib.stack_adapter import get_test_command
-from lib.mock_ai_planner import generate_mock_blueprint
+from lib.mock_ai_planner import generate_blueprint
 
 app = Flask(__name__)
 
@@ -41,7 +41,7 @@ def create_project_route():
         return redirect(url_for('index'))
     
     # Generate mock AI blueprint
-    blueprint_json = generate_mock_blueprint(name, stack, idea)
+    blueprint_json = generate_blueprint(name, stack, idea)
     
     # Validate the blueprint
     validation_result = validate_blueprint(blueprint_json)
