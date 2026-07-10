@@ -6,9 +6,9 @@ Generates realistic mock data for all 20 artifacts.
 import json
 
 
-def generate_mock_blueprint(project_name, stack, idea):
+def generate_blueprint(project_name, stack, idea):
     """
-    Generates a complete mock blueprint with all 13 artifacts.
+    Generates a complete mock blueprint with all 20 artifacts.
     
     Args:
         project_name (str): Name of the project.
@@ -16,7 +16,7 @@ def generate_mock_blueprint(project_name, stack, idea):
         idea (str): Project idea/description.
         
     Returns:
-        dict: Complete blueprint JSON with all 13 artifacts.
+        dict: Complete blueprint JSON with all 20 artifacts.
     """
     
     # ARTIFACT 1: Variables (VAR-xxx)
@@ -374,7 +374,7 @@ def generate_mock_blueprint(project_name, stack, idea):
         }
     ]
     
-    # ARTIFACT 13: ID Tracking Rule
+    # ARTIFACT 13: ID Tracking Rule (Enhanced with all 20 patterns)
     id_tracking = {
         "rule": "Every artifact MUST have unique ID following the pattern XXX-NNN",
         "enforcement": "Builder must include ID in code comments: // REQ-ID: REQ-001",
@@ -391,10 +391,281 @@ def generate_mock_blueprint(project_name, stack, idea):
             "business_rules": "BR-xxx",
             "test_cases": "TC-xxx",
             "forbidden_rules": "FR-xxx",
-            "requirements": "REQ-xxx"
+            "requirements": "REQ-xxx",
+            "object_dictionary": "OBJ-xxx",
+            "event_dictionary": "EVT-xxx",
+            "state_dictionary": "STATE-xxx",
+            "pattern_dictionary": "PAT-xxx",
+            "feature_registry": "FEAT-xxx",
+            "interaction_matrix": "INT-xxx",
+            "ai_build_guard": "GUARD-xxx"
         },
         "validation": "All IDs must be unique within their artifact type"
     }
+    
+    # NEW ARTIFACT 14: Object Dictionary (OBJ-xxx)
+    object_dictionary = [
+        {
+            "id": "OBJ-001",
+            "name": "User",
+            "type": "entity",
+            "properties": ["id", "email", "password_hash", "name", "created_at"],
+            "methods": ["authenticate", "update_profile", "delete"],
+            "owner": "UserModule",
+            "immutable": False,
+            "lifecycle": "persistent",
+            "linked_req": ["REQ-001", "REQ-002"]
+        },
+        {
+            "id": "OBJ-002",
+            "name": "Order",
+            "type": "aggregate",
+            "properties": ["id", "user_id", "status", "total_amount", "items"],
+            "methods": ["add_item", "remove_item", "calculate_total", "confirm"],
+            "owner": "OrderModule",
+            "immutable": False,
+            "lifecycle": "persistent",
+            "linked_req": ["REQ-003", "REQ-004"]
+        },
+        {
+            "id": "OBJ-003",
+            "name": "AuthToken",
+            "type": "value_object",
+            "properties": ["token", "expires_at", "user_id"],
+            "methods": ["validate", "refresh", "revoke"],
+            "owner": "AuthModule",
+            "immutable": True,
+            "lifecycle": "transient",
+            "linked_req": ["REQ-002"]
+        }
+    ]
+    
+    # NEW ARTIFACT 15: Event Dictionary (EVT-xxx)
+    event_dictionary = [
+        {
+            "id": "EVT-001",
+            "name": "USER_CREATED",
+            "category": "created",
+            "payload_schema": {
+                "user_id": "string",
+                "email": "string",
+                "timestamp": "datetime"
+            },
+            "emitters": ["UserService.create()"],
+            "subscribers": ["EmailService", "AuditLog", "AnalyticsEngine"],
+            "retry_policy": "at_least_once",
+            "linked_req": ["REQ-001"]
+        },
+        {
+            "id": "EVT-002",
+            "name": "ORDER_CONFIRMED",
+            "category": "updated",
+            "payload_schema": {
+                "order_id": "string",
+                "user_id": "string",
+                "total": "decimal",
+                "timestamp": "datetime"
+            },
+            "emitters": ["OrderService.confirm()"],
+            "subscribers": ["PaymentProcessor", "InventoryService", "NotificationService"],
+            "retry_policy": "exactly_once",
+            "linked_req": ["REQ-003"]
+        },
+        {
+            "id": "EVT-003",
+            "name": "AUTH_FAILED",
+            "category": "error",
+            "payload_schema": {
+                "user_email": "string",
+                "reason": "string",
+                "ip_address": "string",
+                "timestamp": "datetime"
+            },
+            "emitters": ["AuthService.authenticate()"],
+            "subscribers": ["SecurityMonitor", "AlertSystem"],
+            "retry_policy": "at_most_once",
+            "linked_req": ["REQ-002"]
+        }
+    ]
+    
+    # NEW ARTIFACT 16: State Dictionary (STATE-xxx)
+    state_dictionary = [
+        {
+            "id": "STATE-001",
+            "name": "OrderStateMachine",
+            "entity": "Order",
+            "states": [
+                {
+                    "id": "ST-DRAFT",
+                    "name": "Draft",
+                    "entry_action": "validate_order",
+                    "exit_action": None,
+                    "on_entry": ["log_creation"],
+                    "on_exit": []
+                },
+                {
+                    "id": "ST-CONFIRMED",
+                    "name": "Confirmed",
+                    "entry_action": "reserve_inventory",
+                    "exit_action": "process_payment",
+                    "on_entry": ["send_confirmation_email"],
+                    "on_exit": []
+                },
+                {
+                    "id": "ST-SHIPPED",
+                    "name": "Shipped",
+                    "entry_action": "generate_tracking",
+                    "exit_action": None,
+                    "on_entry": ["notify_customer"],
+                    "on_exit": []
+                }
+            ],
+            "transitions": [
+                {
+                    "from": "ST-DRAFT",
+                    "to": "ST-CONFIRMED",
+                    "trigger": "FN-007",
+                    "guard": "stock_available",
+                    "action": "reserve_stock"
+                },
+                {
+                    "from": "ST-CONFIRMED",
+                    "to": "ST-SHIPPED",
+                    "trigger": "FN-009",
+                    "guard": "payment_confirmed",
+                    "action": "create_shipment"
+                }
+            ],
+            "linked_req": ["REQ-003"]
+        }
+    ]
+    
+    # NEW ARTIFACT 17: Pattern Dictionary (PAT-xxx)
+    pattern_dictionary = [
+        {
+            "id": "PAT-001",
+            "name": "RepositoryPattern",
+            "category": "architectural",
+            "definition": "Abstract data access layer behind a consistent interface",
+            "formula": "Service -> Repository -> Database",
+            "sample_minimum": 1,
+            "confidence_threshold": 1.0,
+            "strategy": "Use for all database operations",
+            "risk_reward_ratio": "1:3",
+            "linked_req": ["REQ-008"]
+        },
+        {
+            "id": "PAT-002",
+            "name": "CQRS",
+            "category": "architectural",
+            "definition": "Separate read and write operations for scalability",
+            "formula": "Commands (Write) != Queries (Read)",
+            "sample_minimum": 2,
+            "confidence_threshold": 0.9,
+            "strategy": "Apply to high-traffic domains",
+            "risk_reward_ratio": "2:5",
+            "linked_req": ["REQ-008"]
+        }
+    ]
+    
+    # NEW ARTIFACT 18: Feature Registry (FEAT-xxx)
+    feature_registry = [
+        {
+            "id": "FEAT-001",
+            "name": "user_activity_score",
+            "category": "behavioral",
+            "source": "user_events",
+            "formula": "sum(login_count * 0.3 + order_count * 0.5 + review_count * 0.2)",
+            "parameters": {"window_days": 30},
+            "update_rate": "per_hour",
+            "priority": "HIGH",
+            "evolution": "v1.0",
+            "feature_store": "PostgreSQL",
+            "linked_req": ["REQ-009"]
+        },
+        {
+            "id": "FEAT-002",
+            "name": "order_velocity",
+            "category": "trend",
+            "source": "orders",
+            "formula": "count(orders) / time_window",
+            "parameters": {"time_window": "7d"},
+            "update_rate": "per_day",
+            "priority": "MEDIUM",
+            "evolution": "v1.0",
+            "feature_store": "Redis",
+            "linked_req": ["REQ-009"]
+        }
+    ]
+    
+    # NEW ARTIFACT 19: Interaction Matrix (INT-xxx)
+    interaction_matrix = [
+        {
+            "id": "INT-001",
+            "module_a": "AuthModule",
+            "module_b": "UserModule",
+            "interaction_type": "function_call",
+            "allowed_interactions": [
+                {"type": "function_call", "function": "getUserById", "direction": "A_to_B"}
+            ],
+            "forbidden_interactions": [
+                {"type": "direct_db_access", "reason": "violates_encapsulation"}
+            ],
+            "coupling": "loose",
+            "linked_req": ["REQ-001"]
+        },
+        {
+            "id": "INT-002",
+            "module_a": "OrderModule",
+            "module_b": "PaymentModule",
+            "interaction_type": "event",
+            "allowed_interactions": [
+                {"type": "event", "event": "EVT-002", "direction": "A_to_B"}
+            ],
+            "forbidden_interactions": [
+                {"type": "synchronous_call", "reason": "causes_tight_coupling"}
+            ],
+            "coupling": "loose",
+            "linked_req": ["REQ-003"]
+        }
+    ]
+    
+    # NEW ARTIFACT 20: AI Build Guard (GUARD-xxx)
+    ai_build_guard = [
+        {
+            "id": "GUARD-001",
+            "category": "naming",
+            "rule": "AI Builder tidak boleh rename object tanpa REQ-ID",
+            "description": "All object renaming must be traced to a requirement",
+            "action": "STOP_BUILD",
+            "severity": "CRITICAL",
+            "scope": "global",
+            "error_message": "STOP_BUILD: Object renaming without REQ-ID detected",
+            "linked_req": ["REQ-010"]
+        },
+        {
+            "id": "GUARD-002",
+            "category": "structure",
+            "rule": "DILARANG membuat folder di luar struktur yang ditentukan",
+            "description": "Folder structure must match project_blueprint exactly",
+            "action": "STOP_BUILD",
+            "severity": "CRITICAL",
+            "scope": "global",
+            "error_message": "STOP_BUILD: Unauthorized directory creation",
+            "linked_req": ["REQ-010"]
+        },
+        {
+            "id": "GUARD-003",
+            "category": "security",
+            "rule": "DILARANG hardcode credentials atau secret keys",
+            "description": "All secrets must come from environment variables",
+            "action": "STOP_BUILD",
+            "severity": "CRITICAL",
+            "scope": "global",
+            "error_message": "STOP_BUILD: Hardcoded credentials detected",
+            "linked_req": ["REQ-010"]
+        }
+    ]
     
     return {
         "project_name": project_name,
@@ -412,5 +683,12 @@ def generate_mock_blueprint(project_name, stack, idea):
         "test_cases": test_cases,
         "forbidden_rules": forbidden_rules,
         "requirements": requirements,
-        "id_tracking": id_tracking
+        "id_tracking": id_tracking,
+        "object_dictionary": object_dictionary,
+        "event_dictionary": event_dictionary,
+        "state_dictionary": state_dictionary,
+        "pattern_dictionary": pattern_dictionary,
+        "feature_registry": feature_registry,
+        "interaction_matrix": interaction_matrix,
+        "ai_build_guard": ai_build_guard
     }
