@@ -1,6 +1,6 @@
 """
 Mock AI Planner module for AI Software Engineering Dashboard.
-Generates realistic mock data for all 13 artifacts.
+Generates realistic mock data for all 20 artifacts.
 """
 
 import json
